@@ -2,7 +2,7 @@ import pygame
 
 from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS
 from dino_runner.components.dinosaur import Dinosaur
-from dino_runner.components.Cactus import Cactus
+from dino_runner.components.cactus import Cactus
 
 class Game:
     def __init__(self):
@@ -33,7 +33,8 @@ class Game:
                 self.playing = False
 
     def update(self):
-        self.player.update()
+        user_input = pygame.key.get_pressed()
+        self.player.update(user_input)
         self.enemy.update()
 
     def draw(self):
