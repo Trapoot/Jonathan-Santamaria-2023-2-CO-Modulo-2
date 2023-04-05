@@ -1,5 +1,5 @@
 import pygame
-
+from dino_runner.components.cloud import Cloud
 from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, FONT_STYLE
 from dino_runner.components.dinosaur import Dinosaur
 from dino_runner.components.menu import Menu
@@ -24,8 +24,13 @@ class Game:
         self.death_count = 0
         self.score = 0
         self.high_score = 0
+        self.cloud_group = pygame.sprite.Group()
 
     def execute(self):
+        pygame.mixer.init()
+        pygame.mixer.music.load('C:\\Users\\Usuario\\Documents\\Jala University\\rocket.mp3')
+        pygame.mixer.music.set_volume(0.05)
+        pygame.mixer.music.play(-1)
         self.running = True
         while self.running:
             if not self.playing:
@@ -38,6 +43,12 @@ class Game:
         self.player.reset_dinosaur()
         self.score = 0
         self.game_speed = self.GAME_SPEED
+        cloud = Cloud()
+        self.cloud_group.add(cloud)
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load('C:\\Users\\Usuario\\Documents\\Jala University\\rocket.mp3')
+        pygame.mixer.music.set_volume(0.05)
+        pygame.mixer.music.play(-1)
         # Game loop: events - update - draw
         self.playing = True
         while self.playing:
@@ -55,6 +66,7 @@ class Game:
         self.player.update(user_input)
         self.obstacle_manager.update(self)
         self.update_score()
+    
 
     def draw(self):
         self.clock.tick(FPS)
@@ -63,6 +75,8 @@ class Game:
         pygame.display.update()
         self.player.draw(self.screen)
         self.obstacle_manager.draw(self.screen)
+        self.cloud_group.update()
+        self.cloud_group.draw(self.screen)
         self.draw_score()
         pygame.display.flip()
 
@@ -115,8 +129,8 @@ class Game:
     def update_score(self):
         self.score +=1
 
-        if self.score % 100 == 0 and self.game_speed < 500:
-            self.game_speed += 5
+        #if self.score % 100 == 0 and self.game_speed < 500:
+            #self.game_speed += 1
     
     def draw_score(self):
         font = pygame.font.Font(FONT_STYLE, 30)
