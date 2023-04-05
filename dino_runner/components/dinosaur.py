@@ -22,7 +22,6 @@ class Dinosaur(Sprite):
         self.jump_speed = self.JUMP_SPEED
         self.dino_duck = False
 
-
     def update(self, user_input):
         if self.dino_run and not self.dino_jump:
             self.run()
