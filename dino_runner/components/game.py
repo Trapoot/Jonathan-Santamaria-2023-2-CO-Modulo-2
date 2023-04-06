@@ -1,9 +1,11 @@
 import pygame
 from dino_runner.components.cloud import Cloud
-from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, FONT_STYLE
+from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, FONT_STYLE, DEFAULT_TYPE
 from dino_runner.components.dinosaur import Dinosaur
 from dino_runner.components.menu import Menu
 from dino_runner.components.obstacles.obstacle_manager import ObstacleManager
+from dino_runner.components.power_ups.power_up_manager import PowerUpManager
+from dino_runner.components.counter import Counter
 
 class Game:
     GAME_SPEED = 20
@@ -19,18 +21,16 @@ class Game:
         self.y_pos_bg = 380
         self.player = Dinosaur()
         self.obstacle_manager = ObstacleManager()
-        self.menu = Menu("Press any key to star", self.screen)
+        self.menu = Menu(self.screen)
         self.running = False
-        self.death_count = 0
-        self.score = 0
-        self.high_score = 0
+        self.score = Counter()
+        self.death_count = Counter()
+        self.highest_score = Counter()
         self.cloud_group = pygame.sprite.Group()
+        self.power_up_manager = PowerUpManager()
 
     def execute(self):
         pygame.mixer.init()
-        pygame.mixer.music.load('C:\\Users\\Usuario\\Documents\\Jala University\\rocket.mp3')
-        pygame.mixer.music.set_volume(0.05)
-        pygame.mixer.music.play(-1)
         self.running = True
         while self.running:
             if not self.playing:
@@ -39,13 +39,9 @@ class Game:
         pygame.quit()
 
     def run(self):
-        self.obstacle_manager.reset_obstacles()
-        self.player.reset_dinosaur()
-        self.score = 0
-        self.game_speed = self.GAME_SPEED
+        self.reset_game()
         cloud = Cloud()
         self.cloud_group.add(cloud)
-        pygame.mixer.music.stop()
         pygame.mixer.music.load('C:\\Users\\Usuario\\Documents\\Jala University\\rocket.mp3')
         pygame.mixer.music.set_volume(0.05)
         pygame.mixer.music.play(-1)
@@ -55,6 +51,8 @@ class Game:
             self.events()
             self.update()
             self.draw()
+        pygame.mixer.music.stop()
+        self.show_menu()
 
     def events(self):
         for event in pygame.event.get():
@@ -65,20 +63,24 @@ class Game:
         user_input = pygame.key.get_pressed()
         self.player.update(user_input)
         self.obstacle_manager.update(self)
-        self.update_score()
+        self.power_up_manager.update(self)
+        self.score.update()
+        self.update_game_speed()
     
 
     def draw(self):
         self.clock.tick(FPS)
         self.screen.fill((255, 255, 255))
         self.draw_background()
-        pygame.display.update()
         self.player.draw(self.screen)
         self.obstacle_manager.draw(self.screen)
         self.cloud_group.update()
+        self.power_up_manager.draw(self.screen)
+        self.draw_power_up_time()
         self.cloud_group.draw(self.screen)
-        self.draw_score()
-        pygame.display.flip()
+        self.score.draw(self.screen)
+        #pygame.display.flip()
+        pygame.display.update()
 
     def draw_background(self):
         image_width = BG.get_width()
@@ -90,51 +92,47 @@ class Game:
         self.x_pos_bg -= self.game_speed
         
     def show_menu(self):
-        half_screen_height = SCREEN_HEIGHT // 2
-        half_screen_widht = SCREEN_WIDTH // 2
         self.menu.reset_screen_color(self.screen)
-        if self.score > self.high_score:
-            self.high_score = self.score
-
-        # Mostrar puntaje
-        score_font = pygame.font.Font(FONT_STYLE, 30)
-        score_text = score_font.render(f'Score: {self.score}', True, (0, 0, 0))
-        score_text_rect = score_text.get_rect()
-        score_text_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
-        self.screen.blit(score_text, score_text_rect)
-
-        # Mostrar mejor puntaje
-        high_score_font = pygame.font.Font(FONT_STYLE, 30)
-        high_score_text = high_score_font.render(f'Best Score: {self.high_score}', True, (0, 0, 0))
-        high_score_text_rect = high_score_text.get_rect()
-        high_score_text_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100)
-        self.screen.blit(high_score_text, high_score_text_rect)
-
-        # Mostrar número de muertes
-        death_font = pygame.font.Font(FONT_STYLE, 30)
-        death_text = death_font.render(f'Death Count: {self.death_count}', True, (0, 0, 0))
-        death_text_rect = death_text.get_rect()
-        death_text_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150)
-        self.screen.blit(death_text, death_text_rect)
-
-        if self.death_count == 0:
-            self.menu.draw(self.screen)
+        half_screen_height = SCREEN_HEIGHT // 2
+        half_screen_width = SCREEN_WIDTH // 2
+        
+        if self.death_count.count == 0:
+            self.menu.draw(self.screen, 'Press any key to start ...')
         else:
-            self.menu.update_massage("Game over, Press any Key to Restart")
-            self.menu.draw(self.screen)
+            self.update_highest_score()
+            self.menu.draw(self.screen, 'Game over. Press any key to restart')
+            self.menu.draw(self.screen, f'Your score: {self.score.count}', half_screen_width, 350, )
+            self.menu.draw(self.screen, f'Highest score: {self.highest_score.count}', half_screen_width, 400, )
+            self.menu.draw(self.screen, f'Total deaths: {self.death_count.count}', half_screen_width, 450, )
 
-        self.screen.blit(ICON,(half_screen_widht - 50, half_screen_height - 140))
+
+        self.screen.blit(ICON, (half_screen_width - 50, half_screen_height - 140))
+        
         self.menu.update(self)
         
-    def update_score(self):
-        self.score +=1
 
-        #if self.score % 100 == 0 and self.game_speed < 500:
-            #self.game_speed += 1
-    
-    def draw_score(self):
-        font = pygame.font.Font(FONT_STYLE, 30)
-        text = font.render(f'Score {self.score}', True, (0, 0, 0))
-        text_rect = text.get_rect()
-        text_rect.center = (1000, 50)
-        self.screen.blit(text, text_rect)
+
+    def update_game_speed(self):
+        if self.score.count % 100 == 0 and self.game_speed < 500:
+            self.game_speed += 1
+
+    def update_highest_score(self):
+        if self.score.count > self.highest_score.count:
+            self.highest_score.set_count(self.score.count)
+
+    def reset_game(self):
+        self.obstacle_manager.reset_obstacles()
+        self.score.reset()
+        self.game_speed = self.GAME_SPEED
+        self.player.reset()   
+        self.power_up_manager.reset()
+
+    def draw_power_up_time(self):
+        if self.player.has_power_up:
+            time_to_show = round((self.player.power_time_up - pygame.time.get_ticks())/ 1000, 2)
+
+            if time_to_show >= 0:
+                self.menu.draw(self.screen, f"{self.player.type.capitalize()} enable for {time_to_show} seconds", 550, 50)
+            else:
+                self.player.has_power_up = False
+                self.player.type = DEFAULT_TYPE
