@@ -5,7 +5,7 @@ from dino_runner.utils.constants import BIRD
 
 
 class Bird(Obstacle):
-  BIRD_HEIGHTS = [280, 220, 170]
+  BIRD_HEIGHTS = [220, 270, 320]
 
   def __init__(self):
     self.type = 0

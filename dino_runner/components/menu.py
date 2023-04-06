@@ -19,12 +19,14 @@ class Menu:
          screen.fill((255, 255, 255))
 
     def handle_events_on_menu(self, game):
-         for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                   game.running = False
-                   game.playing = False
-                elif event.type == pygame.KEYDOWN:
-                    game.run()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game.running = False
+                game.playing = False
+            elif event.type == pygame.KEYDOWN:
+                if game.death_count.count > 0:
+                    game.life += 1
+                game.run()
 
     def draw(self, screen, message, x = HALF_SCREEN_WIDTH, y = HALF_SCREEN_HEIGHT):
         text = self.font.render(message, True, (0, 0, 0))
