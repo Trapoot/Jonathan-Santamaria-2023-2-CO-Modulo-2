@@ -71,9 +71,9 @@ class Game:
 
     def draw(self):
         self.clock.tick(FPS)
-        if self.score.count < 1000:
+        if self.score.count < 500:
             self.screen.fill((255, 255, 255)) # white background
-        elif self.score.count >= 2000:
+        elif self.score.count >= 1000:
             self.screen.fill((255, 255, 255)) # white background
         else:
             self.screen.fill((200, 200, 200)) # gray background

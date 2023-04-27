@@ -26,7 +26,7 @@ class PowerUpManager:
                 if isinstance(power_up, LifeUp):
                     game.life += 1
                     print("LIFE UP")
-                    # Aquí puedes mostrar una animación o mensaje en pantalla
+                    # mensaje en pantalla
                 else:
                     game.player.type = power_up.type
                     game.player.has_power_up = True

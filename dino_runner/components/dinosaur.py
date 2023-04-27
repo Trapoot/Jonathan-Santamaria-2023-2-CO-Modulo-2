@@ -55,7 +55,7 @@ class Dinosaur(Sprite):
         if self.step_index >= 10:
             self.step_index = 0
 
-        if self.has_power_up and self.power_time_up > 0 and self.power_time_up <= 5000: # ajustar el valor de tiempo según su juego
+        if self.has_power_up and self.power_time_up > 0 and self.power_time_up <= 5000: # ajustar el valor de tiempo 
             self.power_time_up -= 1
             if self.power_time_up == 0:
                 self.has_power_up = False
@@ -65,11 +65,11 @@ class Dinosaur(Sprite):
     def run(self):
         if isinstance(RUN_IMG[self.type], list):
             self.image = RUN_IMG[self.type][self.step_index // 5]
-        self.dino_rect = self.image.get_rect()
-        self.dino_rect.x = self.X_POS
-        self.dino_rect.y  = self.Y_POS
-        self.step_index += 1
-        self.dino_jump = False
+            self.dino_rect = self.image.get_rect()
+            self.dino_rect.x = self.X_POS
+            self.dino_rect.y  = self.Y_POS
+            self.step_index += 1
+            self.dino_jump = False
 
     def jump(self):
         self.image = JUMP_IMG[self.type]
@@ -80,10 +80,10 @@ class Dinosaur(Sprite):
             self.dino_rect.y = self.Y_POS
             self.dino_jump = False
             self.jump_speed = self.JUMP_SPEED
-            if self.can_double_jump:
-                self.can_double_jump = False
-                self.jump_speed = self.JUMP_SPEED
-                self.jump()
+            #if self.can_double_jump:
+                #self.can_double_jump = False
+                #self.jump_speed = self.JUMP_SPEED
+                #self.jump()
 
     def duck(self):
         if isinstance(RUN_IMG[self.type], list):
